@@ -32,7 +32,8 @@ async function login(username, password) {
   // Open a new browser and navigate to the login page
   const browser = await puppeteer.launch({
     headless: false,
-    slowMo: 250
+    slowMo: 150,
+    devtools: true
   })
   const page = await browser.newPage()
 
@@ -53,25 +54,43 @@ async function login(username, password) {
 
     await page.type('#EmailOrAccountNumber', username)
     await page.type('#Password', password)
-    // await page.click('#SignInNow')
+    await page.click('#SignInNow')
 
     await page.waitForNavigation()
+
+    const VIPstate = await page.waitForXPath(
+      "/html/body//a[contains(text(),'VIP')]"
+    )
+
+    debugger
+
+    console.log(VIPstate)
+
+    try {
+      while (
+        !!(await page.waitForXPath("/html/body//a[contains(text(),'VIP')]"))
+      ) {
+        await page.goto(acctURL)
+        await page.reload()
+
+        const content = await page.content()
+
+        await delay(13 * 1000)
+      }
+    } catch (err) {
+      console.error('Error in myProgram: %o', err)
+    } finally {
+      //await browser.close()
+    }
   }
 
-  // if (
-  //   (await page.waitForXPath(
-  //     "/html/body//a[contains(text(),'Returns')]",
-  //     30000
-  //   )) !== null // need to make it case insensitive
-  // ) {
-  //   console.log(`Found text: ${keyword}`)
-  //   // whats app message
-  // } else {
-  //   await page.goto(signoutURL)
-  // }
-
-  // Close the browser
-  // await browser.close()
+  async function delay(ms, state = null) {
+    // Generate a random number between 5 and 10
+    const randomTime = Math.floor(Math.random() * 6) + 5
+    return new Promise((resolve, reject) => {
+      window.setTimeout(() => resolve(state), ms + randomTime * 1000)
+    })
+  }
 }
 
 login('SE918533', 'maldives1')
