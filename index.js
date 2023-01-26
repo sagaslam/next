@@ -93,4 +93,4 @@ async function login(username, password) {
   }
 }
 
-login('SE918533', 'maldives1')
+login('username', 'password')
